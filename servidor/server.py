@@ -33,9 +33,15 @@ def salvarListaArquivos(key_dic, lista_arquivos_recebida):
 
     ## realizar busca na estrutura de dados e retornar lista vazia ou de peers
 def buscarArquivo(nomeArquivo):
+    listaPeers = []
     print("INICIANDO BUSCA DE ARQUIVO NO DICIONARIO:")
     print(dicionarioPeers)
-    listaPeers = []
+    for key, value in dicionarioPeers.items():
+        for file in value:
+            if file == nomeArquivo:
+                listaPeers.append(key)
+                print(listaPeers)
+
     return listaPeers
 
 
