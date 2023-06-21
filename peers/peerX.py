@@ -42,13 +42,9 @@ while True:
         mensagem_search = []
         mensagem_search.append("SEARCH")
         mensagem_search.append(arquivo)
-        print(mensagem_search)
-        print(type(mensagem_search))
         s.send(str(mensagem_search).encode())
-        print("MANDOU OP E ARQUIVO A SER BUSCADO NO SERVIDOR")
-        peers_list = s.recv(1024).decode()
-        print("peers com arquivo solicitado: " + peers_list) ## talvez precise do IP e porta do peer
-        print("SEARCH Finalizado")
+        peers_list = s.recv(2048).decode()
+        print(">>> peers com arquivo solicitado: " + peers_list) ## talvez precise do IP e porta do peer
 
     elif operacao == 'quit':
         s.send(operacao.encode())

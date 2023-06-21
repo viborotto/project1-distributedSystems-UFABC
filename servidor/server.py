@@ -18,17 +18,9 @@ dicionarioPeers = {}
 
 # Funcao para tratar a string recebida do peer, separando em uma lista com operacao e arquivos do peer
 def ajustarMensagemRecebida(mensagem_recebida):
-    # print("ajustar mensagem recebida")
-    # print(mensagem_recebida)
     ajustada = ast.literal_eval(mensagem_recebida)
     operacao = ajustada[0]
     informacoes_recebidas = ajustada[1]
-    # print("ajustada: " + str(ajustada))
-    # print(type(ajustada))
-    # print("operacao: " + operacao)
-    # print(type(operacao))
-    # print("informacoes_recebidas: " + str(informacoes_recebidas))
-    # print(type(informacoes_recebidas))
     return ajustada, operacao, informacoes_recebidas
 
 # Definindo a thread para que seja possivel mais de uma conexao ao servidor
@@ -46,31 +38,27 @@ class PeerThread(threading.Thread):
             # Recebendo e tratando mensagem do peer
             data = self.csocket.recv(2048)
             mensagem_recebida = data.decode()
-            print("Mensagem recebida: " + mensagem_recebida)
             if mensagem_recebida == 'quit':
+                print("Mensagem recebida: " + mensagem_recebida)
                 break
             mensagem_ajustada, operacao, informacoes_recebidas = ajustarMensagemRecebida(mensagem_recebida)
             if operacao == "JOIN":
                 # DEVE RECEBER O JOIN E A LISTA, E USAR UM SPLIT POR EXEMPLO PARA SEPARAR NA STRING
-                print("OPERACAO JOIN")
+                print("### OPERACAO JOIN ###")
                 # RECEBER E SALVAR LISTA DE ARQUIVOS NO SERVIDOR
                 key_dic = "" + peer_ip + ":" + str(peer_port)
                 lista_arquivos_recebida = informacoes_recebidas
                 salvarListaArquivos(key_dic, lista_arquivos_recebida)
                 peerSocket.send("JOIN_OK".encode())
-                print("JOIN_OK DO SERVIDOR ENVIADO")
 
             if operacao == "SEARCH":
-                print("SERVIDOR RECEBEU O SEARCH")
+                print("### OPERACAO SEARCH ###")
                 nome_arquivo = informacoes_recebidas
-                print("NOME DO ARQUIVO RECEBIDO NO SERVIDOR: " + nome_arquivo)
                 ## Mandar lista para peer printar
-                peerSocket.send(str(buscarArquivo(nome_arquivo)).encode())
-                print("BUSCOU E ENVIOU LISTA DE PEERS QUE CONTEM O ARQUIVO")
+                lista_peers_contem_arquivo_buscado = str(buscarArquivo(nome_arquivo))
+                peerSocket.send(lista_peers_contem_arquivo_buscado.encode())
+                print("BUSCOU O ARQUIVO " + nome_arquivo + " E ENVIOU LISTA DE PEERS QUE CONTEM O ARQUIVO " + lista_peers_contem_arquivo_buscado)
 
-
-            # print("from client", mensagem_recebida)
-            self.csocket.send(bytes(mensagem_recebida, 'UTF-8'))
         print("Peer at ", peerAddress, " disconnected...")
 
 
@@ -85,12 +73,10 @@ def salvarListaArquivos(key_dic, lista_arquivos_recebida):
     ## Funcao para realizar busca na estrutura de dados e retornar lista vazia ou de peers
 def buscarArquivo(nomeArquivo):
     listaPeers = []
-    print("INICIANDO BUSCA DE ARQUIVO NO DICIONARIO")
     for key, value in dicionarioPeers.items():
         for file in value:
             if file == nomeArquivo:
                 listaPeers.append(key)
-
     return listaPeers
 
 
