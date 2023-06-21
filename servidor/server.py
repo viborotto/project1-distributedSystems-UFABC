@@ -31,7 +31,6 @@ class PeerThread(threading.Thread):
         print("New connection added: ", peerAddress)
 
 
-
     def run(self):
         mensagem_recebida = ''
         while True:
@@ -57,7 +56,12 @@ class PeerThread(threading.Thread):
                 ## Mandar lista para peer printar
                 lista_peers_contem_arquivo_buscado = str(buscarArquivo(nome_arquivo))
                 peerSocket.send(lista_peers_contem_arquivo_buscado.encode())
-                print("BUSCOU O ARQUIVO " + nome_arquivo + " E ENVIOU LISTA DE PEERS QUE CONTEM O ARQUIVO " + lista_peers_contem_arquivo_buscado)
+
+            if operacao == "DOWNLOAD":
+                print("### OPERACAO DOWNLOAD ###")
+                nome_arquivo_download = informacoes_recebidas
+                lista_peers_contem_arquivo_buscado_para_download = str(buscarArquivo(nome_arquivo_download))
+                peerSocket.send(lista_peers_contem_arquivo_buscado_para_download.encode())
 
         print("Peer at ", peerAddress, " disconnected...")
 
@@ -67,16 +71,17 @@ class PeerThread(threading.Thread):
 def salvarListaArquivos(key_dic, lista_arquivos_recebida):
     #dicionarioPeers = {"ip:port": ["arquivo1.txt", "arquivo2.txt"]}
     dicionarioPeers[key_dic] = lista_arquivos_recebida
-    print("### Informacoes do peer foram armazenadas no dicionario ###")
+    print("Peer " + key_dic + " adicionado com arquivos "+ ", ".join(dicionarioPeers[key_dic]))
     print(dicionarioPeers)
 
     ## Funcao para realizar busca na estrutura de dados e retornar lista vazia ou de peers
-def buscarArquivo(nomeArquivo):
+def buscarArquivo(nome_arquivo):
     listaPeers = []
-    for key, value in dicionarioPeers.items():
+    for key_dic, value in dicionarioPeers.items():
+        print("Peer " + key_dic + " solicitou arquivo " + nome_arquivo)
         for file in value:
-            if file == nomeArquivo:
-                listaPeers.append(key)
+            if file == nome_arquivo:
+                listaPeers.append(key_dic)
     return listaPeers
 
 

@@ -12,9 +12,9 @@ server_ip = '127.0.0.1'
 s.connect((server_ip, server_port))
 address = s.getsockname()
 peer_ip, peer_port = s.getsockname()
+diretorio = "directoryY"
 
 def listPeerFiles():
-    diretorio = "directoryY"
     list_files = os.listdir(diretorio)
     return list_files
 
@@ -46,6 +46,18 @@ while True:
         s.send(str(mensagem_search).encode())
         peers_list = s.recv(2048).decode()
         print(">>> peers com arquivo solicitado: " + peers_list) ## talvez precise do IP e porta do peer
+
+    elif operacao == '3':
+        arquivo = input("Arquivo que deseja realizar o download: ")
+        mensagem_download = []
+        mensagem_download.append("DOWNLOAD")
+        ## enviar para o servidor tambem o nome do arquivo que deseja baixar
+        mensagem_download.append(arquivo)
+        s.send(str(mensagem_download).encode())
+        # TODO: print("Arquivo "+ arquivo+ " baixado com sucesso na pasta /"+ diretorio)
+        peers_list_download = s.recv(2048).decode()
+        print("Peers com arquivo para download: " + peers_list_download)
+        peer_escolhido = input("Escolha o Peer que deseja realizar o download do arquivo: ")
 
     elif operacao == 'quit':
         s.send(operacao.encode())
