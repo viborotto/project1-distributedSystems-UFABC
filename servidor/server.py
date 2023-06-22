@@ -27,6 +27,7 @@ class PeerThread(threading.Thread):
     def __init__(self, peerAddress, peerSocket):
         threading.Thread.__init__(self)
         self.csocket = peerSocket
+        self.peerAddress = peerAddress
         print("New connection added: ", peerAddress)
 
 
@@ -91,7 +92,7 @@ while True:
     print("server socket is listening")
     # Estabilish connection with client
     peerSocket, peerAddress = serverSocket.accept()
-    print("Server Connection accepeted")
+    print("Server Connection accepted")
     print("###########################")
     # Separando as informacoes em duas variaveis peer_ip e peer_port
     peer_ip, peer_port = peerAddress
