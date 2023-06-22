@@ -1,5 +1,4 @@
 import socket, os
-#FUNC PEERS; JOIN, SEARCH, UPDATE, DOWNLOAD
 
 s = socket.socket()
 file_name = "arquivo.mp4"
@@ -18,6 +17,8 @@ def listPeerFiles():
     list_files = os.listdir(diretorio)
     return list_files
 
+
+## TODO: EM CADA PEER TEM QUE TER TAMBEM UMA ESCUTA ANTES DA ESCOLHA DA OPERACAO NO CASO DE AGIR COMO SERVER PARA O DOWNLOAD
 while True:
     operacao = input("Operacao voce deseja realizar (1. JOIN, 2. SEARCH, 3. DOWNLOAD): ")
         ## JOIN OPERATION
@@ -47,6 +48,7 @@ while True:
         peers_list = s.recv(2048).decode()
         print(">>> peers com arquivo solicitado: " + peers_list) ## talvez precise do IP e porta do peer
 
+## todo: pensar pq teria que ter uma logica para 2 casos no caso de ser o server do dowload e no caso de ser o client
     elif operacao == '3':
         arquivo = input("Arquivo que deseja realizar o download: ")
         mensagem_download = []

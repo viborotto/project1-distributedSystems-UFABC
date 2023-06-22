@@ -1,8 +1,6 @@
 import socket, os
-#FUNC PEERS; JOIN, SEARCH, UPDATE, DOWNLOAD
 
 s = socket.socket()
-file_name = "arquivo.mp4"
 
 # define the port on which you want connect
 # nesse caso a porta que definimos no servidor
@@ -47,20 +45,44 @@ while True:
         print(">>> peers com arquivo solicitado: " + peers_list)
 
     elif operacao == '3':
+        peer_solicitante_sock = socket.socket()
         arquivo = input("Arquivo que deseja realizar o download: ")
         mensagem_download = []
         mensagem_download.append("DOWNLOAD")
         ## enviar para o servidor tambem o nome do arquivo que deseja baixar
         mensagem_download.append(arquivo)
         s.send(str(mensagem_download).encode())
-        # TODO: print("Arquivo "+ arquivo+ " baixado com sucesso na pasta /"+ diretorio)
+
         peers_list_download = s.recv(2048).decode()
         print("Peers com arquivo para download: " + peers_list_download)
-        peer_escolhido = input("Escolha o Peer que deseja realizar o download do arquivo: ")
-        # TODO: PeerX deve requisitar o arquivo para o peer_escolhido, por exemplo PeerY
-        ## PeerY podera aceitar ou negar o pedido
-        ## PeerY aceitando o pedido, peerX baixara o arquivo na pasta directoryX
 
+        peer_escolhido = input("Escolha o Peer que deseja realizar o download do arquivo: ")
+        peer_escolhido_ip, peer_escolhido_port = peer_escolhido.split(':')
+        print("peer_escolhido_ip: " + peer_escolhido_ip)
+        print("peer_escolhido_port: " + peer_escolhido_port)
+
+        # TODO: PeerX deve requisitar o arquivo para o peer_escolhido, por exemplo PeerY
+        # De acordo com o peer escolhido iremos abrir uma conexao com o Peer definido para que haja o download
+        peer_solicitante_sock.bind((peer_escolhido_ip, peer_escolhido_port))
+        print("peer_solicitante_sock binded to %s" % (peer_escolhido_port))
+        peer_solicitante_sock.listen(5)
+        print("PeerX socket is listening")
+        # Estabilish connection with client, abre a conexao mas tem que receber uma mensagem 'yes' pra continuar
+        peerSocket, peerAddress = peer_solicitante_sock.accept()
+
+        ## PeerY podera aceitar ou negar o pedido
+        ## como o peerY vai receber que o peerX ta solicitando um arquivo?
+        if s.recv(2048).decode() == "yes":
+            ## todo: fazer download
+            print("yees")
+
+
+
+    # TODO: print("Arquivo "+ arquivo+ " baixado com sucesso na pasta /"+ diretorio)
+
+
+        ## PeerY aceitando o pedido, peerX baixara o arquivo na pasta directoryX
+        # if opcao == "yes":
 
     elif operacao == 'quit':
         s.send(operacao.encode())

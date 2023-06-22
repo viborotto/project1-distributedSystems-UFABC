@@ -15,7 +15,6 @@ print("server socket binded to %s" %(port))
 dicionarioPeers = {}
 
 
-
 # Funcao para tratar a string recebida do peer, separando em uma lista com operacao e arquivos do peer
 def ajustarMensagemRecebida(mensagem_recebida):
     ajustada = ast.literal_eval(mensagem_recebida)
