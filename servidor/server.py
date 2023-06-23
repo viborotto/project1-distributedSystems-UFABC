@@ -4,7 +4,7 @@ import ast
 # Estrutura de dados para armazenamento de informacoes Peers - Dicionario
 # Key: "ipPeer:portaPeer"
 # Value: lista de arquivos e.g: ["arquivo1.mp4", "arquivo2.mp4"]
-dicionarioPeers = {}
+dicionario_peers = {}
 
 def configurarServidor():
     port = 1099
@@ -49,15 +49,15 @@ def ajustarMensagemRecebida(mensagem_recebida):
 # Funcao para salvar as informacoes recebidas do peer em um dicionario
 def salvarListaArquivos(key_dic, lista_arquivos_recebida):
     #dicionarioPeers = {"ip:port": ["arquivo1.txt", "arquivo2.txt"]}
-    dicionarioPeers[key_dic] = lista_arquivos_recebida
-    print("Peer " + key_dic + " adicionado com arquivos "+ ", ".join(dicionarioPeers[key_dic]))
-    print(dicionarioPeers)
+    dicionario_peers[key_dic] = lista_arquivos_recebida
+    print("Peer " + key_dic + " adicionado com arquivos "+ ", ".join(dicionario_peers[key_dic]))
+    print(dicionario_peers)
 
 
     ## Funcao para realizar busca na estrutura de dados e retornar lista vazia ou de peers
 def buscarArquivo(nome_arquivo):
     listaPeers = []
-    for key_dic, value in dicionarioPeers.items():
+    for key_dic, value in dicionario_peers.items():
         print("Peer " + key_dic + " solicitou arquivo " + nome_arquivo)
         for file in value:
             if file == nome_arquivo:
@@ -75,6 +75,7 @@ def operacaoJoin(informacoes_recebidas, peer_ip, peer_port, peer_socket):
     peer_socket.send("JOIN_OK".encode())
 
 def operacaoSearch(nome_arquivo, peer_socket):
+    print("### OPERACAO SEARCH ###")
     ## Mandar lista para peer printar
     lista_peers_contem_arquivo_buscado = str(buscarArquivo(nome_arquivo))
     peer_socket.send(lista_peers_contem_arquivo_buscado.encode())
@@ -103,7 +104,6 @@ class HandlePeerThread(threading.Thread):
                 operacaoJoin(informacoes_recebidas, peer_ip, peer_port, self.peerSocket)
 
             if operacao == "SEARCH":
-                print("### OPERACAO SEARCH ###")
                 nome_arquivo = informacoes_recebidas
                 operacaoSearch(nome_arquivo, self.peerSocket)
 
