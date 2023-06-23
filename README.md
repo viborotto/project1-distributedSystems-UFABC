@@ -15,3 +15,4 @@ So using multithreaded socket server, we can accept more than one peer connectio
 
 
 When the Python Client program starts , it will connect to the Python Server Socket Program and waiting input from client side. When you type the message it will send to the server and then you can see the reply messages from server side too.
+
