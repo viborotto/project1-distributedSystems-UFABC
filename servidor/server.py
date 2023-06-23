@@ -7,13 +7,13 @@ import ast
 dicionario_peers = {}
 
 def configurarServidor():
-    port = 1099
-    ip = "127.0.0.1"
+    server_port = 1099
+    server_ip = "127.0.0.1"
     # Inicializando/Configurando Server Socket
-    serverSocket = socket.socket()
+    serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     print("Server Socket EP1 created")
-    serverSocket.bind((ip, port))
-    print("server socket binded to %s" % (port))
+    serverSocket.bind((server_ip, server_port))
+    print("server socket binded to %s" % (server_port))
     return serverSocket
 
 def abrirConexaoServidor(server_socket):
@@ -34,7 +34,7 @@ def listening(server_socket):
         print("###########################")
         # Separando as informacoes em duas variaveis peer_ip e peer_port
         peer_ip, peer_port = peerAddress
-        # inicializa uma thread de peer
+        # inicializa uma thread de peer para um processo a parte
         newthread = HandlePeerThread(peerAddress, peerSocket)
         newthread.start()
 
@@ -84,6 +84,7 @@ def operacaoSearch(nome_arquivo, peer_socket):
 # Definindo a thread para que seja possivel mais de uma conexao ao servidor
 class HandlePeerThread(threading.Thread):
     def __init__(self, peerAddress, peerSocket):
+
         threading.Thread.__init__(self)
         self.peerSocket = peerSocket
         self.peerAddress = peerAddress
@@ -114,6 +115,8 @@ class HandlePeerThread(threading.Thread):
                 lista_peers_contem_arquivo_buscado_para_download = str(buscarArquivo(nome_arquivo_download))
                 self.peerSocket.send(lista_peers_contem_arquivo_buscado_para_download.encode())
 
+        ## ao finalizar a operacao, fecha a conexao com o peer
+        self.peerSocket.close()
         print("Peer at ", self.peerAddress, " disconnected...")
 
 
