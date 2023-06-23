@@ -4,7 +4,7 @@ import ast
 # Estrutura de dados para armazenamento de informacoes Peers - Dicionario
 # Key: "ipPeer:portaPeer"
 # Value: lista de arquivos e.g: ["arquivo1.mp4", "arquivo2.mp4"]
-dicionario_peers = {}
+dicionarioPeers = {}
 
 def configurarServidor():
     port = 1099
@@ -21,6 +21,7 @@ def abrirConexaoServidor(server_socket):
     # put socket into listening mode
     server_socket.listen(5)
     print("server socket is listening")
+
 
 def fecharConexaoServidor(server_socket):
     server_socket.close()
@@ -44,22 +45,25 @@ def ajustarMensagemRecebida(mensagem_recebida):
     informacoes_recebidas = ajustada[1]
     return ajustada, operacao, informacoes_recebidas
 
+
 # Funcao para salvar as informacoes recebidas do peer em um dicionario
 def salvarListaArquivos(key_dic, lista_arquivos_recebida):
     #dicionarioPeers = {"ip:port": ["arquivo1.txt", "arquivo2.txt"]}
-    dicionario_peers[key_dic] = lista_arquivos_recebida
-    print("Peer " + key_dic + " adicionado com arquivos "+ ", ".join(dicionario_peers[key_dic]))
-    print(dicionario_peers)
+    dicionarioPeers[key_dic] = lista_arquivos_recebida
+    print("Peer " + key_dic + " adicionado com arquivos "+ ", ".join(dicionarioPeers[key_dic]))
+    print(dicionarioPeers)
+
 
     ## Funcao para realizar busca na estrutura de dados e retornar lista vazia ou de peers
 def buscarArquivo(nome_arquivo):
     listaPeers = []
-    for key_dic, value in dicionario_peers.items():
+    for key_dic, value in dicionarioPeers.items():
         print("Peer " + key_dic + " solicitou arquivo " + nome_arquivo)
         for file in value:
             if file == nome_arquivo:
                 listaPeers.append(key_dic)
     return listaPeers
+
 
 def operacaoJoin(informacoes_recebidas, peer_ip, peer_port, peer_socket):
     # DEVE RECEBER O JOIN E A LISTA, E USAR UM SPLIT POR EXEMPLO PARA SEPARAR NA STRING
@@ -71,7 +75,6 @@ def operacaoJoin(informacoes_recebidas, peer_ip, peer_port, peer_socket):
     peer_socket.send("JOIN_OK".encode())
 
 def operacaoSearch(nome_arquivo, peer_socket):
-    print("### OPERACAO SEARCH ###")
     ## Mandar lista para peer printar
     lista_peers_contem_arquivo_buscado = str(buscarArquivo(nome_arquivo))
     peer_socket.send(lista_peers_contem_arquivo_buscado.encode())
@@ -100,16 +103,20 @@ class HandlePeerThread(threading.Thread):
                 operacaoJoin(informacoes_recebidas, peer_ip, peer_port, self.peerSocket)
 
             if operacao == "SEARCH":
+                print("### OPERACAO SEARCH ###")
                 nome_arquivo = informacoes_recebidas
                 operacaoSearch(nome_arquivo, self.peerSocket)
 
+
             if operacao == "DOWNLOAD":
-                nome_arquivo_download = informacoes_recebidas
                 print("### OPERACAO DOWNLOAD ###")
+                nome_arquivo_download = informacoes_recebidas
                 lista_peers_contem_arquivo_buscado_para_download = str(buscarArquivo(nome_arquivo_download))
                 self.peerSocket.send(lista_peers_contem_arquivo_buscado_para_download.encode())
 
         print("Peer at ", self.peerAddress, " disconnected...")
+
+
 
 def main():
     serverSocket = configurarServidor()
