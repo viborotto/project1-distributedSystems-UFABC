@@ -31,10 +31,6 @@ def conectarComPeer(server_socket):
     while True:
         # Aceita e estabelece conexao com um peer disponivel
         peer_socket, peer_address = server_socket.accept()
-        print("Server Connection accepted")
-        print("###########################")
-        # Separando as informacoes em duas variaveis peer_ip e peer_port
-        peer_ip, peer_port = peer_address
         # inicializa uma thread de peer para um processo a parte
         new_peer_thread = HandlePeerThread(peer_address, peer_socket)
         new_peer_thread.start()
@@ -43,10 +39,8 @@ def conectarComPeer(server_socket):
 # Funcao para tratar a string recebida do peer, separando em uma lista com operacao e arquivos do peer
 def ajustarMensagemRecebida(mensagem_recebida):
     ajustada = ast.literal_eval(mensagem_recebida)
-    print("ajustada: " + str(ajustada))
     operacao = ajustada[0]
     informacoes_recebidas = ajustada[1]
-    print("informacoes_recebidas: " + str(ajustada[1]))
     return ajustada, operacao, informacoes_recebidas
 
 
@@ -55,8 +49,14 @@ def salvarListaArquivos(key_dic, lista_arquivos_recebida):
     #dicionarioPeers = {"ip:port": ["arquivo1.txt", "arquivo2.txt"]}
     dicionario_peers[key_dic] = lista_arquivos_recebida
     print("Peer " + key_dic + " adicionado com arquivos " + ", ".join(dicionario_peers[key_dic]))
-    print(dicionario_peers)
 
+
+def operacaoJoin(lista_arquivos_recebida, peer_ip, peer_port, peer_socket):
+    # DEVE RECEBER O JOIN E A LISTA, E USAR UM SPLIT POR EXEMPLO PARA SEPARAR NA STRING
+    # RECEBER E SALVAR LISTA DE ARQUIVOS NO SERVIDOR
+    key_dic = "" + peer_ip + ":" + str(peer_port)
+    salvarListaArquivos(key_dic, lista_arquivos_recebida)
+    peer_socket.send("JOIN_OK".encode())
 
 # Funcao para realizar busca na estrutura de dados e retornar lista vazia ou de peers
 def buscarArquivo(nome_arquivo):
@@ -67,18 +67,7 @@ def buscarArquivo(nome_arquivo):
                 listaPeers.append(key_dic)
     return listaPeers
 
-
-def operacaoJoin(informacoes_recebidas, peer_ip, peer_port, peer_socket):
-    # DEVE RECEBER O JOIN E A LISTA, E USAR UM SPLIT POR EXEMPLO PARA SEPARAR NA STRING
-    print("### OPERACAO JOIN ###")
-    # RECEBER E SALVAR LISTA DE ARQUIVOS NO SERVIDOR
-    key_dic = "" + peer_ip + ":" + str(peer_port)
-    lista_arquivos_recebida = informacoes_recebidas
-    salvarListaArquivos(key_dic, lista_arquivos_recebida)
-    peer_socket.send("JOIN_OK".encode())
-
 def operacaoSearch(nome_arquivo, peer_socket):
-    print("### OPERACAO SEARCH ###")
     ## Mandar lista para peer printar
     lista_peers_contem_arquivo_buscado = str(buscarArquivo(nome_arquivo))
     peer_socket.send(lista_peers_contem_arquivo_buscado.encode())
@@ -93,23 +82,17 @@ class HandlePeerThread(threading.Thread):
         print("New connection added: ", peer_address)
 
     def run(self):
-            mensagem_recebida = ''
-        # while True:
+        mensagem_recebida = ''
+        while True:
             # Recebendo e tratando mensagem do peer
             data = self.peer_socket.recv(1024)
-            print("data apos receive: " + str(data))
             mensagem_recebida = data.decode()
-
-            if mensagem_recebida == '':
-                print("MENSAGEM VAZIA")
-
-
             # Obtendo o peer_ip e o peer_port do Peer conectado ao servidor
             peer_ip, peer_port = self.peer_address
 
             # Ajusta a mensagem caso nao seja vazia
             if mensagem_recebida != '':
-                mensagem_ajustada, operacao, informacoes_recebidas = ajustarMensagemRecebida(mensagem_recebida)
+                meajustarMensagemRecebidansagem_ajustada, operacao, informacoes_recebidas = ajustarMensagemRecebida(mensagem_recebida)
 
                 if operacao == "JOIN":
                     operacaoJoin(informacoes_recebidas, peer_ip, peer_port, self.peer_socket)
@@ -124,12 +107,10 @@ class HandlePeerThread(threading.Thread):
                     lista_peers_contem_arquivo_buscado_para_download = str(buscarArquivo(nome_arquivo_download))
                     self.peer_socket.send(lista_peers_contem_arquivo_buscado_para_download.encode())
 
-                if mensagem_recebida == 'quit':
-                    print("Mensagem recebida: " + mensagem_recebida)
 
-            ## ao finalizar a operacao, fecha a conexao com o peer [?]
-            self.peer_socket.close()
-            print("Peer at ", self.peer_address, " disconnected...")
+            elif mensagem_recebida == '':
+                print("MENSAGEM VAZIA")
+                break
 
 
 
